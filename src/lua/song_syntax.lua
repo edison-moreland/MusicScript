@@ -8,14 +8,14 @@
 ---@field bpm number
 ---@field lastBeat number
 ---@field blocks block[]
-currentSong = {
+__currentSong = {
     bpm = 0,
     lastBeat = 0,
     blocks = {}
 }
 
 ---@return block
-local function noteBlock(duration, pitch)
+local function __noteBlock(duration, pitch)
     ---@type block
     return {
         kind = "note",
@@ -25,7 +25,7 @@ local function noteBlock(duration, pitch)
 end
 
 ---@return block
-local function restBlock(duration)
+local function __restBlock(duration)
     return {
         kind = "rest",
         duration = duration,
@@ -33,9 +33,9 @@ local function restBlock(duration)
 end
 
 ---@param block block
-local function pushBlock(block)
-    currentSong.lastBeat = currentSong.lastBeat + block.duration
-    table.insert(currentSong.blocks, block)
+local function __pushBlock(block)
+    __currentSong.lastBeat = __currentSong.lastBeat + block.duration
+    table.insert(__currentSong.blocks, block)
 end
 
 -- Public api below --
@@ -45,26 +45,26 @@ end
 ---@return number
 function bpm(new)
     if new then
-        currentSong.bpm = new
+        __currentSong.bpm = new
     end
-    return currentSong.bpm
+    return __currentSong.bpm
 end
 
 --- Get the current beat
 ---@return number
 function beat()
-    return currentSong.lastBeat
+    return __currentSong.lastBeat
 end
 
 --- Push a note onto the song. Advances beat by duration
 ---@param duration number How long to play note, 1.0 == 1 beat
 ---@param pitch number Note pitch, in hz
 function note(duration, pitch)
-    pushBlock(noteBlock(duration, pitch))
+    __pushBlock(__noteBlock(duration, pitch))
 end
 
 --- Push a rest onto the song. Advances beat by duration
 ---@param duration number
 function rest(duration)
-    pushBlock(restBlock(duration))
+    __pushBlock(__restBlock(duration))
 end

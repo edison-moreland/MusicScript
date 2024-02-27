@@ -34,7 +34,7 @@ fn get_song(lua: Lua) -> LuaResult<Song> {
         blocks: vec![],
     };
 
-    let lua_song: Table = lua.globals().get("currentSong")?;
+    let lua_song: Table = lua.globals().get("__currentSong")?;
 
     song.bpm = lua_song.get("bpm")?;
 
