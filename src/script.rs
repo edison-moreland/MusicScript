@@ -26,6 +26,7 @@ pub struct Song {
 const SONG_SRC: &str = include_str!("lua/song_syntax.lua");
 const TUNING_SRC: &str = include_str!("lua/tuning.lua");
 const PITCH_SRC: &str = include_str!("lua/pitch_notation.lua");
+const TEMPLEOS_SRC: &str = include_str!("lua/templeos.lua");
 
 fn get_song(lua: Lua) -> LuaResult<Song> {
     let mut song = Song {
@@ -86,6 +87,7 @@ pub fn run_script(src: &str) -> LuaResult<Song> {
     // Some helper libraries (more to come)
     lua.load(TUNING_SRC).set_name("tuning.lua").exec()?;
     lua.load(PITCH_SRC).set_name("pitch_notation.lua").exec()?;
+    lua.load(TEMPLEOS_SRC).set_name("templeos.lua").exec()?;
 
     // Run script
     lua.load(src).exec()?;
