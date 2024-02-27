@@ -13,6 +13,11 @@ struct Cli {
     script: PathBuf,
 }
 
+fn instrument(hz: f64) -> impl AudioUnit64 {
+    // TODO: create a more interesting sound
+    sine_hz(hz) >> pan(0.0)
+}
+
 fn sequence_song(song: &Song, sample_rate: f64) -> impl AudioUnit64 {
     let mut sequencer = Sequencer64::new(true, 2);
     sequencer.set_sample_rate(sample_rate);
