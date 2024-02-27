@@ -1,4 +1,4 @@
-# MusicSounds
+# MusicScript
 
 A little scripting environment I created to experiment with intervals, scales, and other music concepts in a familiar
 environment.

@@ -3,16 +3,6 @@
 version = 3
 
 [[package]]
-name = "MusicSounds"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "fundsp",
- "mlua",
-]
-
-[[package]]
 name = "anstream"
 version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -353,6 +343,16 @@ dependencies = [
  "lua-src",
  "luajit-src",
  "pkg-config",
+]
+
+[[package]]
+name = "music_script"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "fundsp",
+ "mlua",
 ]
 
 [[package]]
