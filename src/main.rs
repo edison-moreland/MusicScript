@@ -33,9 +33,9 @@ fn sequence_song(song: &Song, sample_rate: f64) -> impl AudioUnit64 {
                 current_time,
                 current_time + block_duration,
                 Fade::Smooth,
-                0.1,
-                0.25,
-                Box::new(sine_hz(hz) >> pan(0.0)),
+                min(0.05, block_duration),
+                min(0.05, block_duration),
+                Box::new(instrument(hz)),
             );
         }
         current_time += block_duration
