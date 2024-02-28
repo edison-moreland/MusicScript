@@ -3,16 +3,27 @@
 -- After the script is ran, the runtime will load the `currentSong` global out of lua
 
 ---@alias block {duration: number, kind: string, frequency: number | nil}
+---@alias track {lastBeat: number, blocks: block[]}
 
 ---@class Song
 ---@field bpm number
----@field lastBeat number
----@field blocks block[]
+---@field currentTrack number
+---@field tracks track[]
 __currentSong = {
     bpm = 0,
-    lastBeat = 0,
-    blocks = {}
+    currentTrack = 1,
+    tracks = {
+        [1] = {
+            lastBeat = 0,
+            blocks = {}
+        }
+    }
 }
+
+---@return track
+local function __currentTrack()
+    return __currentSong.tracks[__currentSong.currentTrack]
+end
 
 ---@return block
 local function __noteBlock(duration, pitch)
@@ -34,8 +45,10 @@ end
 
 ---@param block block
 local function __pushBlock(block)
-    __currentSong.lastBeat = __currentSong.lastBeat + block.duration
-    table.insert(__currentSong.blocks, block)
+    local track = __currentTrack()
+
+    track.lastBeat = track.lastBeat + block.duration
+    table.insert(track.blocks, block)
 end
 
 -- Public api below --
@@ -53,7 +66,19 @@ end
 --- Get the current beat
 ---@return number
 function beat()
-    return __currentSong.lastBeat
+    return __currentTrack().lastBeat
+end
+
+--- Set the current track to the given index, creating a new track if it doesn't exist
+---@param index number track index
+function track(index)
+    if __currentSong.tracks[index] == nil then
+        __currentSong.tracks[index] = {
+            lastBeat = 0,
+            blocks = {}
+        }
+    end
+    __currentSong.currentTrack = index
 end
 
 --- Push a note onto the song. Advances beat by duration

@@ -16,11 +16,16 @@ pub struct Block {
 }
 
 #[derive(Debug)]
-pub struct Song {
-    pub bpm: u64,
+pub struct Track {
     pub duration: f64,
-    // seconds
     pub blocks: Vec<Block>,
+}
+
+#[derive(Debug)]
+pub struct Song {
+    pub duration: f64,
+    pub bpm: u64,
+    pub tracks: Vec<Track>,
 }
 
 const SONG_SRC: &str = include_str!("lua/song_syntax.lua");
@@ -28,52 +33,82 @@ const TUNING_SRC: &str = include_str!("lua/tuning.lua");
 const PITCH_SRC: &str = include_str!("lua/pitch_notation.lua");
 const TEMPLEOS_SRC: &str = include_str!("lua/templeos.lua");
 
-fn get_song(lua: Lua) -> LuaResult<Song> {
-    let mut song = Song {
-        bpm: 0,
+fn get_block(table: Table) -> Block {
+    let duration: f64 = table.get("duration").expect("Block to have duration");
+    let kind: String = table.get("kind").expect("Block to have kind");
+
+    Block {
+        length: duration,
+        sound: match kind.as_str() {
+            "note" => {
+                let freq = table
+                    .get("frequency")
+                    .expect("Note block to have a frequency");
+
+                Sound::Note(freq)
+            }
+            "rest" => Sound::Rest,
+            _ => panic!("block type doesn't exist"),
+        },
+    }
+}
+
+fn get_track(bpm: u64, table: Table) -> LuaResult<Track> {
+    let mut track = Track {
         duration: 0.0,
         blocks: vec![],
+    };
+
+    let last_beat: f64 = table.get("lastBeat")?;
+    let blocks: Table = table.get("blocks")?;
+
+    let mut track_duration = 0.0;
+
+    track.blocks = blocks
+        .pairs()
+        .map(|item: LuaResult<(isize, Table)>| {
+            let (_, lua_block) = item.unwrap();
+            let block = get_block(lua_block);
+
+            track_duration += block.length;
+
+            return block;
+        })
+        .collect::<Vec<Block>>();
+
+    assert_eq!(last_beat, track_duration);
+
+    track.duration = (60.0 / (bpm as f64)) * track_duration;
+
+    return Ok(track);
+}
+
+fn get_song(lua: Lua) -> LuaResult<Song> {
+    let mut song = Song {
+        duration: 0.0,
+        bpm: 0,
+        tracks: vec![],
     };
 
     let lua_song: Table = lua.globals().get("__currentSong")?;
 
     song.bpm = lua_song.get("bpm")?;
 
-    let last_beat: f64 = lua_song.get("lastBeat")?;
-
-    let blocks: Table = lua_song.get("blocks")?;
-
-    let mut total_duration: f64 = 0.0;
-    song.blocks = blocks
+    let mut max_duration: f64 = 0.0;
+    let tracks: Table = lua_song.get("tracks")?;
+    song.tracks = tracks
         .pairs()
         .map(|item: LuaResult<(isize, Table)>| {
-            let (_, lua_block) = item.unwrap();
+            let (_, lua_track) = item.unwrap();
+            let track = get_track(song.bpm, lua_track).unwrap();
 
-            let duration: f64 = lua_block.get("duration").expect("Block to have duration");
-            let kind: String = lua_block.get("kind").expect("Block to have kind");
+            max_duration = max_duration.max(track.duration);
 
-            total_duration += duration;
-
-            Block {
-                length: duration,
-                sound: match kind.as_str() {
-                    "note" => {
-                        let freq = lua_block
-                            .get("frequency")
-                            .expect("Note block to have a frequency");
-
-                        Sound::Note(freq)
-                    }
-                    "rest" => Sound::Rest,
-                    _ => panic!("FUCK YOU FUCK YOU FUCK YOU"),
-                },
-            }
+            return track;
         })
-        .collect::<Vec<Block>>();
+        .collect::<Vec<Track>>();
 
-    assert_eq!(last_beat, total_duration);
-
-    song.duration = (60.0 / (song.bpm as f64)) * total_duration;
+    song.duration = max_duration;
 
     return Ok(song);
 }

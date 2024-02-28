@@ -24,21 +24,23 @@ fn sequence_song(song: &Song, sample_rate: f64) -> impl AudioUnit64 {
 
     let beat_duration = 60.0 / song.bpm as f64;
 
-    let mut current_time: f64 = 0.0;
-    for block in &song.blocks {
-        let block_duration = beat_duration * block.length;
+    for track in &song.tracks {
+        let mut current_time: f64 = 0.0;
+        for block in &track.blocks {
+            let block_duration = beat_duration * block.length;
 
-        if let Sound::Note(hz) = block.sound {
-            sequencer.push(
-                current_time,
-                current_time + block_duration,
-                Fade::Smooth,
-                min(0.05, block_duration),
-                min(0.05, block_duration),
-                Box::new(instrument(hz)),
-            );
+            if let Sound::Note(hz) = block.sound {
+                sequencer.push(
+                    current_time,
+                    current_time + block_duration,
+                    Fade::Smooth,
+                    min(0.05, block_duration),
+                    min(0.05, block_duration),
+                    Box::new(instrument(hz)),
+                );
+            }
+            current_time += block_duration
         }
-        current_time += block_duration
     }
 
     return sequencer;
