@@ -10,8 +10,8 @@ pub enum Sound {
 // A block of time
 #[derive(Debug)]
 pub struct Block {
+    // (0, inf], where 1 == a whole beat
     pub length: f64,
-    // (0, 1], where 1 == a whole beat
     pub sound: Sound,
 }
 
