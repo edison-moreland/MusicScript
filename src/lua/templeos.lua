@@ -40,7 +40,7 @@ function TempleOS.Play(song)
                 octave = tonumber(o)
             end,
             ["[A-G]"] = function(n)
-                note(4 * duration, SPN(NoteSemitones(n), octave))
+                note(4 * duration, pitch(semitones(n), octave))
             end,
             ["%#"] = function()
                 -- TODO: The previous note was a sharp
@@ -67,7 +67,7 @@ function TempleOS.Play(song)
                 duration = duration * 1.5
             end
         }, function()
-            error("fuck me!")
+            error("I don't know that character!")
         end)
     end
 end

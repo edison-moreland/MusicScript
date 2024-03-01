@@ -1,10 +1,10 @@
 bpm(90)
 
 song = {
-    SPN(A, 4),
-    SPN(C, 5),
-    SPN(G, 4),
-    SPN(F, 4)
+    pitch(A, 4),
+    pitch(C, 5),
+    pitch(G, 4),
+    pitch(F, 4)
 }
 
 for _, f in ipairs(song) do
